@@ -1,0 +1,43 @@
+SDLC PHASES
+
+REQUIREMENTS: This phase basically tells what are the requirements for our project.
+   1. identify user needs(eg add/ delete/ update/ view books)
+   2. define roles(eg admin, guest)
+
+
+
+DESIGN:
+    plan how the system will look
+    choose simple tech stack(HTML, CSS, JS for frontend and Nodejs for backend, MySQL for db)
+    HTML Page: Simple form to enter book details.
+   Architecture:
+      1. Client-Server Model: Browser (Client) sends data to a Server.
+      2. 3-Tier Architecture:
+         Frontend: HTML form
+         Backend (future): Handles form data (e., Node.js)
+         Database (future): Stores book info (e.g MySQL, MongoDB)
+
+
+
+IMPLEMENTATION: In this phase, this is the third phase, we can implement or code our project.\
+   As in Book Management System, we first have to set up file structure.
+   Create basic UI(HTML page)
+   Later coonect it with backend
+
+
+
+TESTING: check whether our projects works properly. 
+    Correct if theres any errors.
+    check responsiveness.
+    (Future scope: Test backend and database connection)
+
+
+DEPLOYMENT:
+   Host the Project:
+   Push code to GitHub
+
+
+MAINTAINCE:
+   fix bugs if any
+   Add moere featuers(edit/search box)
+   improve ui

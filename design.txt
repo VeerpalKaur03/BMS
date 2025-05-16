@@ -1,0 +1,27 @@
+A. Client-Server Model
+    
+    [client - browser] -> <- [server - backend] -> <- [Database]
+
+|   Client (Browser)|  ⇄   |  Server (Backend)   |  ⇄   |     Database     |
+
+
+
+B. 3-Tier Architecture
+
+    1. Presentation Layer(HTML form)
+    2. Logic Layer (Backend - future scope)
+    3. Data Layer (Database - future scope)
+
+  
+|  Presentation Layer         |
+|  (HTML Form - Frontend)     |
+
+            ↓
+
+|  Logic Layer                |
+|  (Backend - contains Logic) |
+
+            ↓
+
+|  Data Layer                 |
+|  (Database - Later)  |
