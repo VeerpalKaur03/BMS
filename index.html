@@ -1,48 +1,55 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Book | Book Management System</title>
 </head>
+
 <body>
     <h2>Add a Book</h2>
+    <input type="text" id="searchInput" placeholder="Search by Title or Author">
+    <button id="searchBtn">Search</button>
+     <br>
+     <br>
     <form action="#" method="post" id="bookForm">
-       <label for="title">Title:</label><br>
-       <input type="text" id="title" name="title" placeholder="title" required><br><br>
+        <label for="title">Title:</label><br>
+        <input type="text" id="title" name="title" placeholder="title" required><br><br>
 
-       <label for="author">Author:</label><br>
-       <input type="text" id="author" name="author" placeholder="author name" required><br><br>
+        <label for="author">Author:</label><br>
+        <input type="text" id="author" name="author" placeholder="author name" required><br><br>
 
-       <label for="isbn">ISBN:</label><br>
-       <input type="text" id="ISBN" name="ISBN" placeholder="isbn" required><br><br>
+        <label for="isbn">ISBN:</label><br>
+        <input type="text" id="ISBN" name="ISBN" placeholder="isbn" required><br><br>
 
-       <label for="pubdate">Publication Date:</label><br>
-       <input type="date" id="pubdate" name="pubdate" placeholder="pubdate" required><br><br>
+        <label for="pubdate">Publication Date:</label><br>
+        <input type="date" id="pubdate" name="pubdate" placeholder="pubdate" required><br><br>
 
-       <label for="genre">Genre:</label><br>
-       <input type="text" id="genre" name="genre" placeholder="genre" required><br><br>
+        <label for="genre">Genre:</label><br>
+        <input type="text" id="genre" name="genre" placeholder="genre" required><br><br>
 
-       <input type="submit" value="Add Book">
+        <input type="submit" value="Add Book">
     </form>
 
 
     <h3>List of the Books</h3>
     <table border="1" id="bookTable">
-    <thead>
-        <tr>
-            <th>Title</th>
-            <th>Author</th>
-            <th>ISBN</th>
-            <th>Publication date</th>
-            <th>Genre</th>
-            <th>Age (Years)</th>
-            <th>Genre Category</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-      <tbody></tbody>
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Author</th>
+                <th>ISBN</th>
+                <th>Publication date</th>
+                <th>Genre</th>
+                <th>Age (Years)</th>
+                <th>Genre Category</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
     </table>
     <script src="script.js"></script>
 </body>
+
 </html>
