@@ -1,193 +1,50 @@
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('bookForm');
-    const tableBody = document.querySelector('#bookTable tbody');
-    const searchInput=document.getElementById('searchInput');
-    const searchBtn=document.getElementById('searchBtn');
+    const tableBody = document.getElementById('bookTable');
+    const searchInput = document.getElementById('searchInput');
+    const searchBtn = document.getElementById('searchBtn');
+    const submitBtn = document.getElementById('submitBtn');
 
+    let books = [];
     let editIndex = null;
-    const books = [];
 
-    //simulate a server req using promise
+    async function loadBooks() {
+        try {
+            const resp = await fetch('http://localhost:3000/books');
+            if (!resp.ok) throw new Error('Failed to fetch books');
+            books = await resp.json();
+            renderBooks();
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    loadBooks();
+
     function serverRequest(action, bookData = null) {
         return new Promise((resolve, reject) => {
-            console.log(`Processing ${action} request...`);
-
             setTimeout(() => {
                 const isError = action !== 'search' && Math.random() < 0.2;
-
                 if (isError) {
-                    reject(`Error: Failed to ${action} book data`);
+                    reject(`Error: Failed to ${action} book`);
                 } else {
-                    resolve({ status: "success", data: bookData });
+                    resolve({ status: 'success', data: bookData });
                 }
             }, 1000);
         });
     }
 
-
-
-    //search the book by its name or by author's name
-    searchBtn.addEventListener('click', async()=>{
-        const query=searchInput.value.trim().toLowerCase();
-
-        try{
-            const resp=await serverRequest('search');
-            const filteredBooks = books.filter(book => book.title.toLowerCase().includes(query) || book.author.toLowerCase().includes(query));
-            renderFilteredBooks(filteredBooks);
-
-        }catch (error) {
-            console.error(error);
-            alert('Failed to search books.');
-        }
-    })
-
-
-    // fetching data from external API
-    //get req
-    async function getData() {
+    searchBtn.addEventListener('click', async () => {
+        const query = searchInput.value.trim().toLowerCase();
         try {
-            let resp = await fetch('https://jsonplaceholder.typicode.com/todos/1')  // return a promise
-            let data = await resp.json();
-            console.log(data);
-        } catch (error) {
-            console.error('GET Error:', error.message);
+            await serverRequest('search');
+            const filtered = books.filter(b => b.title.toLowerCase().includes(query) || b.author.toLowerCase().includes(query));
+            renderFilteredBooks(filtered);
+        } catch (err) {
+            console.error(err);
+            alert('Search failed');
         }
-
-    }
-
-
-    //post req
-    async function postData() {
-        try {
-            let resp = await fetch('https://jsonplaceholder.typicode.com/posts', {
-                method: 'POST',
-                headers: {
-                    'content-type': 'application/json'
-                },
-                body: JSON.stringify({
-                    title: 'I m the title',
-                    body: 'I m body',
-                    userId: 1
-                })
-            });
-
-            const data = await resp.json()
-            console.log(data);
-        } catch (error) {
-            console.error('POST Error:', error.message);
-        }
-    }
-
-
-    //put req
-    async function putData() {
-        try {
-            let resp = await fetch('https://jsonplaceholder.typicode.com/posts/1', {
-                method: 'PUT',
-                headers: {
-                    'content-type': 'application/json'
-                },
-                body: JSON.stringify({
-                    ID: 1,
-                    title: 'updated title',
-                    body: 'updated body',
-                    userId: 1
-
-                })
-            });
-            const data = await resp.json();
-            console.log(data);
-        } catch (error) {
-            console.error('PUT Error:', error.message);
-        }
-    }
-
-
-    //delete req
-    async function deleteData() {
-        try {
-            const resp = await fetch('https://jsonplaceholder.typicode.com/posts/1', {
-                method: 'DELETE'
-            });
-            if (resp.ok) {
-                console.log('delete was successful');
-            } else {
-                console.log('not successful')
-            }
-
-        } catch (error) {
-            console.error('DELETE Error:', error.message);
-        }
-    }
-
-
-    function renderBooks() {
-        tableBody.innerHTML = '';
-
-        books.forEach((book, index) => {
-            const age = calculateBookAge(book.pubdate);
-            const category = categorizeGenre(book.genre);
-
-            const row = document.createElement('tr');
-            row.innerHTML = `
-            <td>${book.title}</td>
-            <td>${book.author}</td>
-            <td>${book.isbn}</td>
-            <td>${book.pubdate}</td>
-            <td>${book.genre}</td>
-            <td>${age}</td>
-            <td>${category}</td>
-            <td>
-                <button onclick="editBook(${index})">Edit</button>
-                <button onclick="deleteBook(${index})">Delete</button>
-            </td>`;
-            tableBody.appendChild(row);
-        });
-    }
-
-
-        function renderFilteredBooks(filteredBooks) {
-        tableBody.innerHTML = '';
-
-        filteredBooks.forEach((book, index) => {
-            const age = calculateBookAge(book.pubdate);
-            const category = categorizeGenre(book.genre);
-
-            const row = document.createElement('tr');
-            row.innerHTML = `
-            <td>${book.title}</td>
-            <td>${book.author}</td>
-            <td>${book.isbn}</td>
-            <td>${book.pubdate}</td>
-            <td>${book.genre}</td>
-            <td>${age}</td>
-            <td>${category}</td>
-            <td>
-                <button onclick="editBook(${index})">Edit</button>
-                <button onclick="deleteBook(${index})">Delete</button>
-            </td>`;
-            tableBody.appendChild(row);
-        });
-    }
-
-
-    function calculateBookAge(pubDate) {
-        const pubYear = new Date(pubDate).getFullYear();
-        const currentYear = new Date().getFullYear();
-        return currentYear - pubYear;
-    }
-
-
-    function categorizeGenre(genre) {
-        const g = genre.toLowerCase();
-        if (['sci-fi', 'fantasy', 'horror'].includes(g)) return 'Fiction';
-        if (['biography', 'history', 'self-help'].includes(g)) return 'Non-Fiction';
-        if (['romance', 'drama'].includes(g)) return 'Literature';
-        if (['thriller', 'mystery'].includes(g)) return 'Mystery';
-        return 'Other';
-    }
-
-
+    });
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -203,35 +60,96 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (isNaN(isbn)) {
-            return alert('ISBN must be a numeric value.');
+            return alert('ISBN must be numeric.');
         }
 
         const newBook = { title, author, isbn, pubdate, genre };
-        let data1 = await getData();
-        let data2 = await postData();
-        let data3 = await putData();
-        let data4 = await deleteData();
-
 
         try {
-            await serverRequest("add", newBook);
-
             if (editIndex !== null) {
-                books[editIndex] = newBook;
+                const bookId = books[editIndex].id;
+                const response = await fetch(`http://localhost:3000/books/${bookId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(newBook),
+                });
+                if (!response.ok) throw new Error('Failed to update book');
+                const updatedBook = await response.json();
+                books[editIndex] = updatedBook;
                 editIndex = null;
-            } else {
-                books.push(newBook);
-            }
+                submitBtn.value = "Add Book";
 
+            } else {
+                const response = await fetch('http://localhost:3000/books', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(newBook),
+                });
+                if (!response.ok) throw new Error('Failed to add book');
+                const savedBook = await response.json();
+                books.push(savedBook);
+            }
             renderBooks();
+            form.reset();
         } catch (error) {
             console.error(error);
-            alert(error);
+            alert('Error saving book: ' + error.message);
         }
-
-        form.reset();
-        
     });
+    //render data to table
+    function renderBooks() {
+        tableBody.innerHTML = '';
+        books.forEach((book, index) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${book.title}</td>
+                <td>${book.author}</td>
+                <td>${book.isbn}</td>
+                <td>${book.pubdate}</td>
+                <td>${book.genre}</td>
+                <td>${calculateBookAge(book.pubdate)}</td>
+                <td>${categorizeGenre(book.genre)}</td>
+                <td>
+                    <button onclick="editBook(${index})" class="text-blue-500">Edit</button>
+                    <button onclick="deleteBook(${index})" class="text-red-500">Delete</button>
+                </td>`;
+            tableBody.appendChild(row);
+        });
+    }
+    
+    //render filtered books
+    function renderFilteredBooks(filtered) {
+        tableBody.innerHTML = '';
+        filtered.forEach((book, index) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${book.title}</td>
+                <td>${book.author}</td>
+                <td>${book.isbn}</td>
+                <td>${book.pubdate}</td>
+                <td>${book.genre}</td>
+                <td>${calculateBookAge(book.pubdate)}</td>
+                <td>${categorizeGenre(book.genre)}</td>
+                <td>
+                    <button onclick="editBook(${index})" class="text-blue-500">Edit</button>
+                    <button onclick="deleteBook(${index})" class="text-red-500">Delete</button>
+                </td>`;
+            tableBody.appendChild(row);
+        });
+    }
+
+    function calculateBookAge(pubDate) {
+        return new Date().getFullYear() - new Date(pubDate).getFullYear();
+    }
+
+    function categorizeGenre(genre) {
+        const g = genre.toLowerCase();
+        if (['sci-fi', 'fantasy', 'horror'].includes(g)) return 'Fiction';
+        if (['biography', 'history', 'self-help'].includes(g)) return 'Non-Fiction';
+        if (['romance', 'drama'].includes(g)) return 'Literature';
+        if (['thriller', 'mystery'].includes(g)) return 'Mystery';
+        return 'Other';
+    }
 
     window.editBook = (index) => {
         const book = books[index];
@@ -240,22 +158,21 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('ISBN').value = book.isbn;
         document.getElementById('pubdate').value = book.pubdate;
         document.getElementById('genre').value = book.genre;
-
         editIndex = index;
+        submitBtn.value = "Update Book";
     };
-
 
     window.deleteBook = async (index) => {
         const confirmDelete = confirm('Are you sure you want to delete this book?');
         if (!confirmDelete) return;
-
+        const bookId = books[index].id;
         try {
-            await serverRequest("delete");
+            const resp = await fetch(`http://localhost:3000/books/${bookId}`, { method: 'DELETE' });
+            if (!resp.ok) throw new Error('Failed to delete book');
             books.splice(index, 1);
             renderBooks();
-        } catch (error) {
-            console.error(error);
-            alert(error);
+        } catch (err) {
+            alert(err.message);
         }
     };
 });
