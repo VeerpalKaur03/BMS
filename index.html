@@ -2,54 +2,107 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Book | Book Management System</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Add Book | Book Management System</title>
+  <link href="src/output.css" rel="stylesheet" />
 </head>
 
 <body>
-    <h2>Add a Book</h2>
-    <input type="text" id="searchInput" placeholder="Search by Title or Author">
-    <button id="searchBtn">Search</button>
-     <br>
-     <br>
-    <form action="#" method="post" id="bookForm">
-        <label for="title">Title:</label><br>
-        <input type="text" id="title" name="title" placeholder="title" required><br><br>
+  <div class="bg-gray-300 min-h-screen">
+    <h2 class="text-4xl text-amber-100 flex bg-gray-800 justify-center p-4">BMS</h2>
 
-        <label for="author">Author:</label><br>
-        <input type="text" id="author" name="author" placeholder="author name" required><br><br>
+    <div class="flex justify-center w-full m-2 gap-1">
+      <input class="bg-gray-200 rounded-xl placeholder-gray-400 outline-none w-full max-w-2xl text-l p-2 font-medium"
+        type="text" id="searchInput" placeholder="Search" />
+      <button id="searchBtn"
+        class="cursor-pointer px-2 py-2 bg-gray-800 text-white rounded-xl">Search</button>
+    </div>
 
-        <label for="isbn">ISBN:</label><br>
-        <input type="text" id="ISBN" name="ISBN" placeholder="isbn" required><br><br>
+    <div class="flex justify-center gap-4 mt-4">
+      <button id="sortAZ" class="bg-blue-500 text-gray-600 px-4 py-2 rounded cursor-pointer">Sort A->Z</button>
+      <button id="sortZA" class="bg-blue-500 text-gray-600 px-4 py-2 rounded cursor-pointer">Sort Z->A</button>
+    </div>
 
-        <label for="pubdate">Publication Date:</label><br>
-        <input type="date" id="pubdate" name="pubdate" placeholder="pubdate" required><br><br>
+    <div class="flex flex-col sm:flex-row justify-center w-full">
+      <form class="p-4 w-full max-w-2xl" method="post" id="bookForm">
+        <div class="border-white rounded-2xl bg-gray-100 p-4">
+          <label class="block text-xl font-semibold text-gray-700 pl-2 pt-2" for="title">Title</label>
+          <input class="pl-2 outline-none placeholder-gray-400 w-full sm:w-auto" type="text" id="title" name="title"
+            placeholder="title" required /><br><br>
 
-        <label for="genre">Genre:</label><br>
-        <input type="text" id="genre" name="genre" placeholder="genre" required><br><br>
+          <label class="block text-xl font-semibold text-gray-700 pl-2" for="author">Author</label>
+          <input class="pl-2 outline-none placeholder-gray-400 w-full sm:w-auto" type="text" id="author" name="author"
+            placeholder="author name" required /><br><br>
 
-        <input type="submit" value="Add Book">
-    </form>
+          <label class="block text-xl font-semibold text-gray-700 pl-2" for="isbn">ISBN</label>
+          <input class="pl-2 outline-none placeholder-gray-400 w-full sm:w-auto" type="text" id="ISBN" name="ISBN"
+            placeholder="isbn" required /><br><br>
 
+          <label class="block text-xl font-semibold text-gray-700 pl-2" for="pubdate">Publication Date</label>
+          <input class="pl-2 outline-none placeholder-gray-400 w-full sm:w-auto" type="date" id="pubdate" name="pubdate"
+            required /><br><br>
 
-    <h3>List of the Books</h3>
-    <table border="1" id="bookTable">
-        <thead>
-            <tr>
-                <th>Title</th>
-                <th>Author</th>
-                <th>ISBN</th>
-                <th>Publication date</th>
-                <th>Genre</th>
-                <th>Age (Years)</th>
-                <th>Genre Category</th>
-                <th>Actions</th>
-            </tr>
+          <label class="block text-xl font-semibold text-gray-700 pl-2" for="genre">Genre</label>
+          <input class="pl-2 outline-none placeholder-gray-400 w-full sm:w-auto" type="text" id="genre" name="genre"
+            placeholder="genre" required /><br><br>
+
+          <label class="text-xl font-semibold text-gray-700 pl-2" for="bookType">Book Type:
+            <select name="bookType" id="bookType" class="ml-2">
+              <option value="printed">Printed Book</option>
+              <option value="ebook">EBook</option>
+            </select>
+          </label>
+
+          <div id="ebookFields" class="m-2 hidden">
+            <label for="fileSize">File Size (MB):</label>
+            <input class="outline-none placeholder-gray-400" type="number" id="fileSize" name="fileSize" min="0" step="0.1">
+
+            <label for="format">Format:</label>
+            <input class="outline-none placeholder-gray-400" type="text" id="format" name="format"
+              placeholder="e.g., PDF, EPUB">
+          </div>
+
+          <div id="printedFields" class="m-2">
+            <label for="pages">Pages:</label>
+            <input class="outline-none placeholder-gray-400" type="number" id="pages" name="pages" min="1">
+
+            <label for="coverType">Cover Type:</label>
+            <input class="outline-none placeholder-gray-400" type="text" id="coverType" name="coverType"
+              placeholder="e.g., Hardcover, Paperback">
+          </div>
+
+          <div class="flex justify-center m-3 text-2xl pb-2">
+            <input type="submit" value="Add Book" id="submitBtn"
+              class="bg-gray-800 text-white px-6 py-2 rounded-xl cursor-pointer w-full sm:w-auto" />
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <h3 class="text-2xl font-bold text-gray-800 text-center mt-8">List of the Books</h3>
+
+    <div class="overflow-x-auto w-full max-w-6xl mx-auto p-4">
+      <table class="w-full text-sm sm:text-base table-auto border-collapse bg-white rounded-xl shadow-md">
+        <thead class="bg-gray-800 text-white">
+          <tr>
+            <th class="px-4 py-2 border">Title</th>
+            <th class="px-4 py-2 border">Author</th>
+            <th class="px-4 py-2 border">ISBN</th>
+            <th class="px-4 py-2 border">Publication Date</th>
+            <th class="px-4 py-2 border">Genre</th>
+            <th class="px-4 py-2 border">Age (Years)</th>
+            <th class="px-4 py-2 border">Genre Category</th>
+            <th class="px-4 py-2 border">Actions</th>
+          </tr>
         </thead>
-        <tbody></tbody>
-    </table>
-    <script src="script.js"></script>
+        <tbody id="bookTable" class="text-gray-700">
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
 </body>
 
 </html>

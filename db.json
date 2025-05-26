@@ -1,0 +1,12 @@
+{
+  "books": [
+    {
+      "id": "886c",
+      "title": "verity",
+      "author": "collen hoover",
+      "isbn": "97654321",
+      "pubdate": "2025-05-13",
+      "genre": "thriller"
+    }
+  ]
+}
