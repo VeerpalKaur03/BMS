@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "firefox",
+      "request": "launch",
+      "name": "Launch Firefox and Debug",
+      "url": "http://localhost:5500",
+      "webRoot": "${workspaceFolder}",
+      "firefoxExecutable": "/usr/bin/firefox"
+    }
+  ]
+}

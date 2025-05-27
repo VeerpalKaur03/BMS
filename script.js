@@ -14,12 +14,13 @@ document.addEventListener('DOMContentLoaded', () => {
   let editIndex = null;
 
   class Book {
-    constructor(title, author, isbn, pubdate, genre) {
+    constructor(title, author, isbn, pubdate, genre, price) {
       this.title = title;
       this.author = author;
       this.isbn = isbn;
       this.pubdate = pubdate;
       this.genre = genre;
+      this.price = price;
     }
     calculateAge() {
       return new Date().getFullYear() - new Date(this.pubdate).getFullYear();
@@ -31,6 +32,21 @@ document.addEventListener('DOMContentLoaded', () => {
       if (['romance', 'drama'].includes(g)) return 'Literature';
       if (['thriller', 'mystery'].includes(g)) return 'Mystery';
       return 'Other';
+    }
+
+    applyDiscount(percent) {
+      if (this.price) {
+        return this.price - (this.price * (percent / 100));
+      }
+      return null;
+    }
+
+    isNewRelease() {
+      const pubdate = new Date(this.pubdate).getFullYear();
+      const currYear = new Date().getFullYear();
+
+      if(currYear - pubdate <= 1) return 'New'
+      else return 'Old';
     }
   }
 
@@ -63,6 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
   bookType.addEventListener('change', toggleBookFields);
   toggleBookFields();
 
+  //gettting data from server
   async function loadBooks() {
     try {
       const resp = await fetch('http://localhost:3000/books');
@@ -76,6 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   loadBooks();
 
+  //simulate server request 
   function serverRequest(action, bookData = null) {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
@@ -89,6 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // use to serach particular book
   searchBtn.addEventListener('click', async () => {
     const query = searchInput.value.trim().toLowerCase();
     try {
@@ -100,6 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // sorting
   sortAZBtn.addEventListener('click', () => {
     books.sort((a, b) => a.title.localeCompare(b.title));
     renderBooks();
@@ -110,6 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderBooks();
   });
 
+
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const title = document.getElementById('title').value.trim();
@@ -117,6 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const isbn = document.getElementById('ISBN').value.trim();
     const pubdate = document.getElementById('pubdate').value;
     const genre = document.getElementById('genre').value.trim();
+    const price = document.getElementById('price').value.trim();
 
     if (![title, author, isbn, pubdate, genre].every(Boolean)) {
       return alert('Please fill in all fields.');
@@ -126,9 +148,10 @@ document.addEventListener('DOMContentLoaded', () => {
       return alert('ISBN must be numeric.');
     }
 
-    const newBook = new Book(title, author, isbn, pubdate, genre);
+    const newBook = new Book(title, author, isbn, pubdate, genre, price);
 
     try {
+      // edit 
       if (editIndex !== null) {
         const bookId = books[editIndex].id;
         const response = await fetch(`http://localhost:3000/books/${bookId}`, {
@@ -136,12 +159,16 @@ document.addEventListener('DOMContentLoaded', () => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(newBook),
         });
+
         if (!response.ok) throw new Error('Failed to update book');
         const updatedBook = await response.json();
         books[editIndex] = updatedBook;
         editIndex = null;
         submitBtn.value = "Add Book";
-      } else {
+      }
+
+      //add the book
+      else {
         const response = await fetch('http://localhost:3000/books', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -159,10 +186,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // render books into the table
   function renderBooks() {
     tableBody.innerHTML = '';
     books.forEach((book, index) => {
-      const bookObj = new Book(book.title, book.author, book.isbn, book.pubdate, book.genre);
+      const bookObj = new Book(book.title, book.author, book.isbn, book.pubdate, book.genre, book.price);
       const row = document.createElement('tr');
       row.innerHTML = `
         <td>${book.title}</td>
@@ -172,18 +200,24 @@ document.addEventListener('DOMContentLoaded', () => {
         <td>${book.genre}</td>
         <td>${bookObj.calculateAge()}</td>
         <td>${bookObj.categorize()}</td>
+        <td>${book.price}</td>
+        <td>$${bookObj.applyDiscount(10)} <span class="text-green-500 text-sm">(10% off)</span></td>
+        <td>${bookObj.isNewRelease()}<span class="text-blue-400"></span> </td>
         <td>
           <button onclick="editBook(${index})" class="text-blue-500">Edit</button>
           <button onclick="deleteBook(${index})" class="text-red-500">Delete</button>
-        </td>`;
+        </td>
+        
+`;
       tableBody.appendChild(row);
     });
   }
 
+  //render the ffiltered books
   function renderFilteredBooks(filtered) {
     tableBody.innerHTML = '';
     filtered.forEach((book, index) => {
-      const bookObj = new Book(book.title, book.author, book.isbn, book.pubdate, book.genre);
+      const bookObj = new Book(book.title, book.author, book.isbn, book.pubdate, book.genre, book.price);
       const row = document.createElement('tr');
       row.innerHTML = `
         <td>${book.title}</td>
@@ -193,10 +227,13 @@ document.addEventListener('DOMContentLoaded', () => {
         <td>${book.genre}</td>
         <td>${bookObj.calculateAge()}</td>
         <td>${bookObj.categorize()}</td>
+        <td>${book.price}</td>
+        <td>$${bookObj.applyDiscount(10)} <span class="text-green-500 text-sm">(10% off)</span></td>  
         <td>
           <button onclick="editBook(${index})" class="text-blue-500">Edit</button>
           <button onclick="deleteBook(${index})" class="text-red-500">Delete</button>
-        </td>`;
+        </td>
+`;
       tableBody.appendChild(row);
     });
   }
@@ -212,6 +249,7 @@ document.addEventListener('DOMContentLoaded', () => {
     submitBtn.value = "Update Book";
   };
 
+  //delete book
   window.deleteBook = async (index) => {
     if (!confirm('Are you sure you want to delete this book?')) return;
     const bookId = books[index].id;

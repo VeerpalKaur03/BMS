@@ -15,8 +15,7 @@
     <div class="flex justify-center w-full m-2 gap-1">
       <input class="bg-gray-200 rounded-xl placeholder-gray-400 outline-none w-full max-w-2xl text-l p-2 font-medium"
         type="text" id="searchInput" placeholder="Search" />
-      <button id="searchBtn"
-        class="cursor-pointer px-2 py-2 bg-gray-800 text-white rounded-xl">Search</button>
+      <button id="searchBtn" class="cursor-pointer px-2 py-2 bg-gray-800 text-white rounded-xl">Search</button>
     </div>
 
     <div class="flex justify-center gap-4 mt-4">
@@ -54,9 +53,11 @@
             </select>
           </label>
 
+
           <div id="ebookFields" class="m-2 hidden">
             <label for="fileSize">File Size (MB):</label>
-            <input class="outline-none placeholder-gray-400" type="number" id="fileSize" name="fileSize" min="0" step="0.1">
+            <input class="outline-none placeholder-gray-400" type="number" id="fileSize" name="fileSize" min="0"
+              step="0.1">
 
             <label for="format">Format:</label>
             <input class="outline-none placeholder-gray-400" type="text" id="format" name="format"
@@ -71,6 +72,12 @@
             <input class="outline-none placeholder-gray-400" type="text" id="coverType" name="coverType"
               placeholder="e.g., Hardcover, Paperback">
           </div>
+
+
+          <label class="block text-xl font-semibold text-gray-700 pl-2" for="price">Price</label>
+          <input class="pl-2 outline-none placeholder-gray-400 w-full sm:w-auto" type="number" id="price" name="price"
+            placeholder="Price" min="0" required /><br><br>
+
 
           <div class="flex justify-center m-3 text-2xl pb-2">
             <input type="submit" value="Add Book" id="submitBtn"
@@ -93,6 +100,9 @@
             <th class="px-4 py-2 border">Genre</th>
             <th class="px-4 py-2 border">Age (Years)</th>
             <th class="px-4 py-2 border">Genre Category</th>
+            <th class="px-4 py-2 border">Price</th>
+            <th class="px-4 py-2 border">Discounted Price</th>
+            <th class="px-4 py-2 border">Trending</th>
             <th class="px-4 py-2 border">Actions</th>
           </tr>
         </thead>
