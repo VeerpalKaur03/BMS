@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let books = [];
   let editIndex = null;
 
+  // Book Classes
   class Book {
     constructor(title, author, isbn, pubdate, genre, price) {
       this.title = title;
@@ -22,9 +23,11 @@ document.addEventListener('DOMContentLoaded', () => {
       this.genre = genre;
       this.price = price;
     }
+
     calculateAge() {
       return new Date().getFullYear() - new Date(this.pubdate).getFullYear();
     }
+
     categorize() {
       const g = this.genre.toLowerCase();
       if (['sci-fi', 'fantasy', 'horror'].includes(g)) return 'Fiction';
@@ -35,158 +38,89 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     applyDiscount(percent) {
-      if (this.price) {
-        return this.price - (this.price * (percent / 100));
-      }
-      return null;
+      return this.price ? this.price - (this.price * (percent / 100)) : null;
     }
 
     isNewRelease() {
-      const pubdate = new Date(this.pubdate).getFullYear();
-      const currYear = new Date().getFullYear();
-
-      if(currYear - pubdate <= 1) return 'New'
-      else return 'Old';
+      const pubYear = new Date(this.pubdate).getFullYear();
+      return (new Date().getFullYear() - pubYear <= 1) ? 'New' : 'Old';
     }
   }
 
   class EBook extends Book {
-    constructor(title, author, isbn, pubdate, genre, fileSize, format) {
-      super(title, author, isbn, pubdate, genre);
+    constructor(title, author, isbn, pubdate, genre, price, fileSize, format) {
+      super(title, author, isbn, pubdate, genre, price);
       this.fileSize = fileSize;
       this.format = format;
     }
   }
 
   class PrintedBook extends Book {
-    constructor(title, author, isbn, pubdate, genre, pages, coverType) {
-      super(title, author, isbn, pubdate, genre);
+    constructor(title, author, isbn, pubdate, genre, price, pages, coverType) {
+      super(title, author, isbn, pubdate, genre, price);
       this.pages = pages;
       this.coverType = coverType;
     }
   }
 
+  // Toggle fields based on book type
   function toggleBookFields() {
-    if (bookType.value === 'ebook') {
-      ebookFields.classList.remove('hidden');
-      printedFields.classList.add('hidden');
-    } else {
-      ebookFields.classList.add('hidden');
-      printedFields.classList.remove('hidden');
-    }
+    ebookFields.classList.toggle('hidden', bookType.value !== 'ebook');
+    printedFields.classList.toggle('hidden', bookType.value === 'ebook');
   }
 
   bookType.addEventListener('change', toggleBookFields);
   toggleBookFields();
 
-  //gettting data from server
+ //API Functions 
+//fetch books
+  async function fetchBooks() {
+    const resp = await fetch('http://localhost:3000/books');
+    if (!resp.ok) throw new Error('Failed to fetch books');
+    return await resp.json();
+  }
+
+  //add
+  async function addBook(book) {
+    const resp = await fetch('http://localhost:3000/books', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(book),
+    });
+    if (!resp.ok) throw new Error('Failed to add book');
+    return await resp.json();
+  }
+
+  //update
+  async function updateBook(id, book) {
+    const resp = await fetch(`http://localhost:3000/books/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(book),
+    });
+    if (!resp.ok) throw new Error('Failed to update book');
+    return await resp.json();
+  }
+
+  // delete
+  async function deleteBookFromServer(id) {
+    const resp = await fetch(`http://localhost:3000/books/${id}`, {
+      method: 'DELETE',
+    });
+    if (!resp.ok) throw new Error('Failed to delete book');
+  }
+
+//load
   async function loadBooks() {
     try {
-      const resp = await fetch('http://localhost:3000/books');
-      if (!resp.ok) throw new Error('Failed to fetch books');
-      books = await resp.json();
+      books = await fetchBooks();
       renderBooks();
     } catch (error) {
-      console.error(error);
+      console.error(error.message);
     }
   }
 
-  loadBooks();
-
-  //simulate server request 
-  function serverRequest(action, bookData = null) {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        const isError = action !== 'search' && Math.random() < 0.2;
-        if (isError) {
-          reject(`Error: Failed to ${action} book`);
-        } else {
-          resolve({ status: 'success', data: bookData });
-        }
-      }, 1000);
-    });
-  }
-
-  // use to serach particular book
-  searchBtn.addEventListener('click', async () => {
-    const query = searchInput.value.trim().toLowerCase();
-    try {
-      await serverRequest('search');
-      const filtered = books.filter(b => b.title.toLowerCase().includes(query) || b.author.toLowerCase().includes(query));
-      renderFilteredBooks(filtered);
-    } catch (err) {
-      alert('Search failed');
-    }
-  });
-
-  // sorting
-  sortAZBtn.addEventListener('click', () => {
-    books.sort((a, b) => a.title.localeCompare(b.title));
-    renderBooks();
-  });
-
-  sortZABtn.addEventListener('click', () => {
-    books.sort((a, b) => b.title.localeCompare(a.title));
-    renderBooks();
-  });
-
-
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const title = document.getElementById('title').value.trim();
-    const author = document.getElementById('author').value.trim();
-    const isbn = document.getElementById('ISBN').value.trim();
-    const pubdate = document.getElementById('pubdate').value;
-    const genre = document.getElementById('genre').value.trim();
-    const price = document.getElementById('price').value.trim();
-
-    if (![title, author, isbn, pubdate, genre].every(Boolean)) {
-      return alert('Please fill in all fields.');
-    }
-
-    if (isNaN(isbn)) {
-      return alert('ISBN must be numeric.');
-    }
-
-    const newBook = new Book(title, author, isbn, pubdate, genre, price);
-
-    try {
-      // edit 
-      if (editIndex !== null) {
-        const bookId = books[editIndex].id;
-        const response = await fetch(`http://localhost:3000/books/${bookId}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(newBook),
-        });
-
-        if (!response.ok) throw new Error('Failed to update book');
-        const updatedBook = await response.json();
-        books[editIndex] = updatedBook;
-        editIndex = null;
-        submitBtn.value = "Add Book";
-      }
-
-      //add the book
-      else {
-        const response = await fetch('http://localhost:3000/books', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(newBook),
-        });
-        if (!response.ok) throw new Error('Failed to add book');
-        const savedBook = await response.json();
-        books.push(savedBook);
-      }
-      renderBooks();
-      form.reset();
-      toggleBookFields();
-    } catch (error) {
-      alert('Error saving book: ' + error.message);
-    }
-  });
-
-  // render books into the table
+  // render book n print in table
   function renderBooks() {
     tableBody.innerHTML = '';
     books.forEach((book, index) => {
@@ -202,18 +136,17 @@ document.addEventListener('DOMContentLoaded', () => {
         <td>${bookObj.categorize()}</td>
         <td>${book.price}</td>
         <td>$${bookObj.applyDiscount(10)} <span class="text-green-500 text-sm">(10% off)</span></td>
-        <td>${bookObj.isNewRelease()}<span class="text-blue-400"></span> </td>
+        <td>${bookObj.isNewRelease()}</td>
         <td>
           <button onclick="editBook(${index})" class="text-blue-500">Edit</button>
           <button onclick="deleteBook(${index})" class="text-red-500">Delete</button>
         </td>
-        
-`;
+      `;
       tableBody.appendChild(row);
     });
   }
 
-  //render the ffiltered books
+  // render filter books
   function renderFilteredBooks(filtered) {
     tableBody.innerHTML = '';
     filtered.forEach((book, index) => {
@@ -228,16 +161,79 @@ document.addEventListener('DOMContentLoaded', () => {
         <td>${bookObj.calculateAge()}</td>
         <td>${bookObj.categorize()}</td>
         <td>${book.price}</td>
-        <td>$${bookObj.applyDiscount(10)} <span class="text-green-500 text-sm">(10% off)</span></td>  
+        <td>$${bookObj.applyDiscount(10)} <span class="text-green-500 text-sm">(10% off)</span></td>
+        <td>${bookObj.isNewRelease()}</td>
         <td>
           <button onclick="editBook(${index})" class="text-blue-500">Edit</button>
           <button onclick="deleteBook(${index})" class="text-red-500">Delete</button>
         </td>
-`;
+      `;
       tableBody.appendChild(row);
     });
   }
 
+
+
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const title = document.getElementById('title').value.trim();
+    const author = document.getElementById('author').value.trim();
+    const isbn = document.getElementById('ISBN').value.trim();
+    const pubdate = document.getElementById('pubdate').value;
+    const genre = document.getElementById('genre').value.trim();
+    const price = document.getElementById('price').value.trim();
+
+    if (![title, author, isbn, pubdate, genre, price].every(Boolean)) {
+      return alert('Please fill in all fields.');
+    }
+
+    if (isNaN(isbn)) {
+      return alert('ISBN must be numeric.');
+    }
+
+    const newBook = new Book(title, author, isbn, pubdate, genre, price);
+
+    try {
+      if (editIndex !== null) {
+        const bookId = books[editIndex].id;
+        const updatedBook = await updateBook(bookId, newBook);
+        books[editIndex] = updatedBook;
+        editIndex = null;
+        submitBtn.value = "Add Book";
+      } else {
+        const savedBook = await addBook(newBook);
+        books.push(savedBook);
+      }
+
+      renderBooks();
+      form.reset();
+      toggleBookFields();
+    } catch (error) {
+      alert('Error saving book: ' + error.message);
+    }
+  });
+
+  searchBtn.addEventListener('click', () => {
+    const query = searchInput.value.trim().toLowerCase();
+    const filtered = books.filter(
+      b => b.title.toLowerCase().includes(query) || b.author.toLowerCase().includes(query)
+    );
+    renderFilteredBooks(filtered);
+  });
+
+  sortAZBtn.addEventListener('click', () => {
+    books.sort((a, b) => a.title.localeCompare(b.title));
+    renderBooks();
+  });
+
+  sortZABtn.addEventListener('click', () => {
+    books.sort((a, b) => b.title.localeCompare(a.title));
+    renderBooks();
+  });
+
+
+  
   window.editBook = (index) => {
     const book = books[index];
     document.getElementById('title').value = book.title;
@@ -245,21 +241,23 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('ISBN').value = book.isbn;
     document.getElementById('pubdate').value = book.pubdate;
     document.getElementById('genre').value = book.genre;
+    document.getElementById('price').value = book.price;
     editIndex = index;
     submitBtn.value = "Update Book";
   };
 
-  //delete book
   window.deleteBook = async (index) => {
     if (!confirm('Are you sure you want to delete this book?')) return;
     const bookId = books[index].id;
     try {
-      const resp = await fetch(`http://localhost:3000/books/${bookId}`, { method: 'DELETE' });
-      if (!resp.ok) throw new Error('Failed to delete book');
+      await deleteBookFromServer(bookId);
       books.splice(index, 1);
       renderBooks();
     } catch (err) {
       alert(err.message);
     }
   };
+
+
+  loadBooks();
 });
